@@ -1,8 +1,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { inject } from '@vercel/analytics';
 import App from './App';
-import { Analytics } from "@vercel/analytics/next"
+
+// Initialize Vercel Analytics
+inject();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -13,6 +16,5 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <App />
-    <Analytics />
   </React.StrictMode>
 );
