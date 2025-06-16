@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImage from '../logo.png';
 
 interface HeaderProps {
   title: string;
@@ -6,7 +7,8 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ title }) => {
   return (
-    <header className="w-full py-6 text-center mb-6 md:mb-8">
+    <header className="flex flex-col items-center justify-center w-full py-6 text-center mb-6 md:mb-8">
+      <img src={logoImage} alt="Logo" className="w-24 h-24 mb-4" />
       <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-zodiacLavender via-accentLavenderRose to-accentNiagara">
         {title}
       </h1>

@@ -8,8 +8,17 @@ interface ReleaseNotesModalProps {
 
 const releaseNotes = [
   {
-    version: "v1.2.0",
+    version: "v1.2.1",
     date: "Latest Update",
+    notes: [
+      "Fixed: Promote new logo for application",
+      "Fixed: Improve UI for prompt input card",
+      "Refactor footer UI"
+    ]
+  },
+  {
+    version: "v1.2.0",
+    date: "Previous Update",
     notes: [
       "CSS Focus Styles Disabled: All focus outlines and ring styles have been removed via global CSS and component-level class removal as per user request.",
       "Accessibility Note: This change may impact users who rely on keyboard navigation or have certain visual impairments, as visual focus indicators are no longer present."
