@@ -8,8 +8,16 @@ interface ReleaseNotesModalProps {
 
 const releaseNotes = [
   {
-    version: "v1.2.1",
+    version: "v1.3.0",
     date: "Latest Update",
+    notes: [
+      "Implement Vercel Analytics",
+      "Implement Google GenAI"
+    ]
+  },
+  {
+    version: "v1.2.2",
+    date: "Previous Update",
     notes: [
       "Fixed: Promote new logo for application",
       "Fixed: Improve UI for prompt input card",
