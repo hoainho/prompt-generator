@@ -331,7 +331,6 @@ const App: React.FC = () => {
             </div>
 
             <div className="flex flex-col items-center md:items-end space-y-3">
-              <p className="text-textOnDarkSecondary text-sm mb-1 hidden md:block">Connect:</p>
               <div className="flex space-x-6">
                 <a 
                   href="https://www.hoainho.info" 
