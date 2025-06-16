@@ -1,0 +1,6 @@
+{
+  "name": "Prompt Generator & Enhancer",
+  "description": "A web application to generate and improve prompts for large language models, using the Gemini API.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

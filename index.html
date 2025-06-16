@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Generator & Enhancer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              // New "Zodiac Depths" Palette
+              // Core Blues & Lavender from image
+              zodiacDeepBlue: '#112D60',    // Base dark blue
+              zodiacSubmarineLight: '#B6C0C5', // Light grayish blue
+              zodiacLavender: '#DD83E0',     // Vibrant lavender
+
+              // From text: LAVENDER ROSE OXFORD BLUE
+              accentLavenderRose: '#FDABDD', // Lighter, pinkish lavender
+              zodiacOxfordBlue: '#374A5A',   // Dark, desaturated blue-gray
+
+              // From text: NIAGARA SLEPTIC
+              accentNiagara: '#05999E',       // Teal/Cyan
+              accentSlepticTeal: '#CBE7E3',    // Very light teal/mint
+
+              // Text colors for dark backgrounds
+              textOnDarkPrimary: '#F0F8FF', // AliceBlue - very light
+              textOnDarkSecondary: '#CAD4E1',// Soft light grayish blue
+              textOnDarkMuted: '#8899AA',   // Muted grayish blue
+
+              // UI Element Colors
+              surfaceBase: 'rgba(17, 45, 96, 0.88)',       // zodiacDeepBlue with alpha
+              surfaceElevated: 'rgba(55, 74, 90, 0.92)',   // zodiacOxfordBlue with alpha
+              borderSubtle: 'rgba(182, 192, 197, 0.35)',   // zodiacSubmarineLight with alpha
+              borderStrong: 'rgba(182, 192, 197, 0.6)',    // zodiacSubmarineLight with more alpha
+              
+              // Semantic names mapped to the new palette
+              themePrimaryAction: '#DD83E0',   // zodiacLavender
+              themeSecondaryAction: '#05999E', // accentNiagara
+              themeAccent: '#FDABDD',         // accentLavenderRose
+
+              // Error Colors (adjusted for theme)
+              errorSurface: 'rgba(74, 55, 68, 0.9)', // Muted dark pink/red background
+              errorAccent: '#E57373',         // Softer red for border/icon
+              errorTextOnSurface: '#F0F8FF',  // Light text on error background
+            },
+            animation: {
+              'zodiac-flow': 'zodiacFlow 40s ease infinite alternate', 
+              'float-orb': 'floatOrb 20s infinite ease-in-out', // Generic orb animation
+            },
+            keyframes: {
+              zodiacFlow: { 
+                '0%': { backgroundPosition: '0% 0%' },
+                '50%': { backgroundPosition: '100% 100%' },
+                '100%': { backgroundPosition: '0% 0%' },
+              },
+              floatOrb: {
+                '0%': { transform: 'translateY(0px) translateX(0px) scale(1)', opacity: 0 },
+                '20%': { opacity: 0.7 },
+                '80%': { opacity: 0.5 },
+                '100%': { transform: 'translateY(-250px) translateX(20px) scale(0.8)', opacity: 0 },
+              }
+            },
+            boxShadow: {
+              'soft-glow-lavender': '0 0 15px 5px rgba(221, 131, 224, 0.35)', // zodiacLavender glow
+              'soft-glow-niagara': '0 0 15px 5px rgba(5, 153, 158, 0.35)',  // accentNiagara glow
+              'deep-lift': '0 10px 25px rgba(0,0,0,0.4)', 
+              'subtle-highlight': '0 0 8px rgba(182, 192, 197, 0.25)', // zodiacSubmarineLight glow
+              'orb-glow-lavender': '0 0 20px 5px rgba(221, 131, 224, 0.5)',
+              'orb-glow-niagara': '0 0 20px 5px rgba(5, 153, 158, 0.4)',
+              'orb-glow-rose': '0 0 20px 5px rgba(253, 171, 221, 0.4)',
+              'orb-glow-submarine': '0 0 20px 5px rgba(182, 192, 197, 0.3)',
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.2.0"
+  }
+}
+</script>
+  <style>
+    html, body, #root {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      /* Gradient incorporating zodiacDeepBlue, zodiacLavender, and zodiacSubmarineLight hints */
+      background: linear-gradient(300deg, #112D60, #1a3b70, #224880, #DD83E0, #B6C0C5, #112D60);
+      background-size: 300% 300%; 
+      animation: zodiacFlow 40s ease infinite alternate;
+      color: #F0F8FF; /* textOnDarkPrimary */
+      overflow-x: hidden; 
+    }
+    #root {
+      position: relative;
+      z-index: 1;
+      height: 100%; 
+      overflow-y: auto; 
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    /* --- Footer Orb Container --- */
+    .orb-footer-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 200px; /* Adjust height as needed */
+      pointer-events: none;
+      z-index: 0; /* Behind main content but above body background */
+      overflow: hidden; /* Important to clip orbs */
+    }
+
+    .orb {
+      position: absolute;
+      bottom: -50px; /* Start below the viewport */
+      border-radius: 50%;
+      opacity: 0; /* Start invisible */
+      animation-name: floatOrb;
+      animation-timing-function: linear; /* Changed for smoother continuous float */
+      animation-iteration-count: infinite;
+    }
+
+    /* Define individual orbs */
+    .orb-1 { width: 30px; height: 30px; background-color: rgba(221, 131, 224, 0.3); box-shadow: var(--tw-shadow-orb-glow-lavender); left: 10%; animation-duration: 25s; animation-delay: 0s; }
+    .orb-2 { width: 50px; height: 50px; background-color: rgba(5, 153, 158, 0.25); box-shadow: var(--tw-shadow-orb-glow-niagara); left: 20%; animation-duration: 30s; animation-delay: 5s; }
+    .orb-3 { width: 20px; height: 20px; background-color: rgba(253, 171, 221, 0.35); box-shadow: var(--tw-shadow-orb-glow-rose); left: 30%; animation-duration: 22s; animation-delay: 2s; }
+    .orb-4 { width: 60px; height: 60px; background-color: rgba(182, 192, 197, 0.2); box-shadow: var(--tw-shadow-orb-glow-submarine); left: 40%; animation-duration: 35s; animation-delay: 8s; }
+    .orb-5 { width: 35px; height: 35px; background-color: rgba(221, 131, 224, 0.28); box-shadow: var(--tw-shadow-orb-glow-lavender); left: 50%; animation-duration: 28s; animation-delay: 3s; }
+    .orb-6 { width: 45px; height: 45px; background-color: rgba(5, 153, 158, 0.3); box-shadow: var(--tw-shadow-orb-glow-niagara); left: 60%; animation-duration: 26s; animation-delay: 6s; }
+    .orb-7 { width: 25px; height: 25px; background-color: rgba(253, 171, 221, 0.32); box-shadow: var(--tw-shadow-orb-glow-rose); left: 70%; animation-duration: 32s; animation-delay: 1s; }
+    .orb-8 { width: 55px; height: 55px; background-color: rgba(182, 192, 197, 0.22); box-shadow: var(--tw-shadow-orb-glow-submarine); left: 80%; animation-duration: 29s; animation-delay: 7s; }
+    .orb-9 { width: 40px; height: 40px; background-color: rgba(221, 131, 224, 0.26); box-shadow: var(--tw-shadow-orb-glow-lavender); left: 90%; animation-duration: 24s; animation-delay: 4s; }
+    .orb-10 { width: 30px; height: 30px; background-color: rgba(5, 153, 158, 0.28); box-shadow: var(--tw-shadow-orb-glow-niagara); left: 5%; animation-duration: 33s; animation-delay: 9s; }
+    
+    /* Modified keyframes for floating orbs */
+    @keyframes floatOrb {
+      0% {
+        transform: translateY(0px) translateX(0px) scale(0.9);
+        opacity: 0;
+      }
+      10% { /* Fade in early */
+        opacity: var(--start-opacity, 0.4); /* Use a CSS variable for start opacity if needed */
+      }
+      50% {
+        transform: translateY(-100px) translateX(calc(20px * var(--direction, 1))) scale(1);
+        opacity: var(--mid-opacity, 0.6);
+      }
+      90% { /* Fade out late */
+        opacity: var(--end-opacity, 0.3);
+      }
+      100% {
+        transform: translateY(-200px) translateX(calc(40px * var(--direction, 1))) scale(0.85);
+        opacity: 0;
+      }
+    }
+    
+    .orb-1 { --direction: 1; --start-opacity: 0.5; --mid-opacity: 0.7; --end-opacity: 0.4;}
+    .orb-2 { --direction: -1; --start-opacity: 0.4; --mid-opacity: 0.6; --end-opacity: 0.3;}
+    .orb-3 { --direction: 1; --start-opacity: 0.6; --mid-opacity: 0.8; --end-opacity: 0.5;}
+    .orb-4 { --direction: -1; --start-opacity: 0.3; --mid-opacity: 0.5; --end-opacity: 0.2;}
+    .orb-5 { --direction: 1; --start-opacity: 0.5; --mid-opacity: 0.7; --end-opacity: 0.4;}
+    .orb-6 { --direction: -1; --start-opacity: 0.4; --mid-opacity: 0.6; --end-opacity: 0.3;}
+    .orb-7 { --direction: 1; --start-opacity: 0.6; --mid-opacity: 0.8; --end-opacity: 0.5;}
+    .orb-8 { --direction: -1; --start-opacity: 0.3; --mid-opacity: 0.5; --end-opacity: 0.2;}
+    .orb-9 { --direction: 1; --start-opacity: 0.5; --mid-opacity: 0.7; --end-opacity: 0.4;}
+    .orb-10 { --direction: -1; --start-opacity: 0.4; --mid-opacity: 0.6; --end-opacity: 0.3;}
+
+
+    /* Custom scrollbar for the new theme */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(17, 45, 96, 0.5); /* zodiacDeepBlue with alpha for track */
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #05999E; /* accentNiagara */
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #DD83E0; /* zodiacLavender */
+    }
+
+    /* Globally disable focus outlines and box-shadows */
+    *:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="animate-zodiac-flow">
+    <div id="root"></div>
+    <div class="orb-footer-container" aria-hidden="true">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="orb orb-4"></div>
+      <div class="orb orb-5"></div>
+      <div class="orb orb-6"></div>
+      <div class="orb orb-7"></div>
+      <div class="orb orb-8"></div>
+      <div class="orb orb-9"></div>
+      <div class="orb orb-10"></div>
+    </div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
